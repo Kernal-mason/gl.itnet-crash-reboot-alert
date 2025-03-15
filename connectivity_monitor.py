@@ -33,6 +33,7 @@ import time
 from datetime import datetime
 from dotenv import load_dotenv
 from config import CONFIG
+from notifications import send_notification
 
 # Initialize environment and logging
 load_dotenv()
@@ -45,38 +46,6 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout)
     ]
 )
-
-def send_pushover_notification(message: str, priority: int = 0) -> None:
-    """
-    Send notification via Pushover service.
-
-    Args:
-        message (str): The message to send
-        priority (int): Message priority (-2 to 2)
-            -2: Lowest priority
-            -1: Low priority
-             0: Normal priority
-             1: High priority
-             2: Emergency priority
-
-    Raises:
-        requests.exceptions.RequestException: If the notification fails to send
-    """
-    try:
-        response = requests.post(
-            "https://api.pushover.net/1/messages.json",
-            data={
-                "token": CONFIG['PUSHOVER_TOKEN'],
-                "user": CONFIG['PUSHOVER_USER'],
-                "message": message,
-                "priority": priority
-            },
-            timeout=CONFIG['TIMEOUT']
-        )
-        response.raise_for_status()
-        logging.info("Pushover notification sent successfully")
-    except Exception as e:
-        logging.error(f"Failed to send Pushover notification: {str(e)}")
 
 def check_connectivity() -> bool:
     """
@@ -101,7 +70,7 @@ def check_connectivity() -> bool:
                 logging.info(f"Waiting {CONFIG['RETRY_DELAY']} seconds before retry...")
                 time.sleep(CONFIG['RETRY_DELAY'])
             else:
-                send_pushover_notification(error_message, priority=1)
+                send_notification(error_message, priority=1)
     return False
 
 def reboot_system() -> None:
@@ -117,7 +86,7 @@ def reboot_system() -> None:
     """
     try:
         logging.info("Initiating system reboot")
-        send_pushover_notification(
+        send_notification(
             "System is being rebooted due to connectivity issues",
             priority=1
         )
@@ -125,7 +94,7 @@ def reboot_system() -> None:
     except Exception as e:
         error_message = f"Failed to reboot system: {str(e)}"
         logging.error(error_message)
-        send_pushover_notification(error_message, priority=2)
+        send_notification(error_message, priority=2)
         sys.exit(4)
 
 def main() -> None:
@@ -150,7 +119,7 @@ def main() -> None:
     except Exception as e:
         error_message = f"Script execution failed: {str(e)}"
         logging.error(error_message)
-        send_pushover_notification(error_message, priority=2)
+        send_notification(error_message, priority=2)
         sys.exit(1)
 
 if __name__ == "__main__":
