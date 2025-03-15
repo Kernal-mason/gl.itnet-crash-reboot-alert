@@ -10,11 +10,11 @@
 # on systems with limited storage capacity.
 
 # Simple log rotation script for busybox systems
-MAX_SIZE=1048576  # 1MB in bytes
+MAX_SIZE=524288  # 512KB in bytes - adjusted for router storage
 LOG_FILE="/var/log/connectivity.log"
 
 # Check if log file exists and is larger than MAX_SIZE
-if [ -f "$LOG_FILE" ] && [ $(stat -c%s "$LOG_FILE") -gt $MAX_SIZE ]; then
+if [ -f "$LOG_FILE" ] && [ $(busybox stat -c%s "$LOG_FILE") -gt $MAX_SIZE ]; then
     mv "$LOG_FILE" "$LOG_FILE.old"
     touch "$LOG_FILE"
     chmod 644 "$LOG_FILE"

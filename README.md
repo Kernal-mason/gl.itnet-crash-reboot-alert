@@ -17,12 +17,50 @@ A Python script that monitors network connectivity and automatically reboots the
 ## Prerequisites
 
 - Python 3.6 or higher
-- Busybox-based Linux system
+- GL-iNet router or other Busybox-based system
 - Pushover account (for notifications)
+
+### GL-iNet Router Specific
+
+Most GL-iNet routers come with Python3 and BusyBox pre-installed. You may need to:
+
+1. Enable external storage if installing on a router with limited space:
+```bash
+opkg update
+opkg install kmod-usb-storage
+```
+
+2. Install pip if not already available:
+```bash
+opkg install python3-pip
+```
 
 ## Installation
 
-1. Install required Python package:
+There are two ways to install the Connectivity Monitor:
+
+### Automatic Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/masongonzalez/connectivity-monitor.git
+cd connectivity-monitor
+```
+
+2. Run the installation script:
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+3. Configure your environment:
+```bash
+nano .env  # Edit with your Pushover credentials and settings
+```
+
+### Manual Installation
+
+1. Install required Python packages:
 ```bash
 opkg update  # or your system's package manager
 opkg install python3-pip
@@ -33,6 +71,8 @@ pip3 install -r requirements.txt
 ```bash
 cp connectivity_monitor.py /usr/bin/
 chmod +x /usr/bin/connectivity_monitor.py
+cp rotate_logs.sh /usr/bin/
+chmod +x /usr/bin/rotate_logs.sh
 ```
 
 3. Create log directory with appropriate permissions:
@@ -44,20 +84,32 @@ chmod 644 /var/log/connectivity.log
 4. Configure environment variables:
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
-nano .env
+nano .env  # Edit with your Pushover credentials and settings
 ```
+
+### Post-Installation
+
+After either installation method:
+
+1. Verify your installation:
+```bash
+python3 test_connectivity.py
+```
+
+2. If the test passes, proceed to set up the cron job as described in the "Setting up the Cron Job" section.
 
 ## Configuration
 
-1. Open the script and update the following variables:
+The following environment variables can be configured in your `.env` file:
+
 ```python
-PUSHOVER_TOKEN = 'YOUR_APP_TOKEN'  # Your Pushover application token
-PUSHOVER_USER = 'YOUR_USER_KEY'    # Your Pushover user key
-TARGET_URL = 'https://example.com' # URL or IP to monitor
-TIMEOUT = 10                       # Request timeout in seconds
-MAX_RETRIES = 3                   # Number of retry attempts before reboot
-RETRY_DELAY = 30                  # Delay between retries in seconds
+PUSHOVER_TOKEN=your_pushover_token_here  # Your Pushover application token
+PUSHOVER_USER=your_pushover_user_here    # Your Pushover user key
+TARGET_URL=https://example.com           # URL or IP to monitor
+TIMEOUT=5                                # Request timeout in seconds
+MAX_RETRIES=3                           # Number of retry attempts
+RETRY_DELAY=15                          # Delay between retries in seconds
+LOG_PATH=/var/log/connectivity.log      # Path to log file
 ```
 
 2. Ensure the script has permissions to execute reboot:
@@ -67,9 +119,14 @@ chmod +s /sbin/reboot  # Only if necessary and security policies allow
 
 ## Setting up the Cron Job
 
-1. Open the crontab editor:
+### GL-iNet/BusyBox Systems
+
+The installation script automatically sets up the cron jobs in `/etc/crontabs/root`. 
+To manually configure:
+
+1. Open the crontab file:
 ```bash
-crontab -e
+vi /etc/crontabs/root
 ```
 
 2. Add the following line to run the script every 5 minutes:
@@ -77,6 +134,11 @@ crontab -e
 */5 * * * * /usr/bin/connectivity_monitor.py
 # Add log rotation to run daily at midnight
 0 0 * * * /usr/bin/rotate_logs.sh
+```
+
+3. Restart the cron daemon:
+```bash
+/etc/init.d/cron restart
 ```
 
 ## Testing
@@ -121,6 +183,22 @@ Example log entries:
 3. If logs aren't being written:
    - Check file permissions on the log file
    - Verify the user running the script has write access
+
+### GL-iNet Specific Issues
+
+1. If Python packages fail to install:
+   - Ensure you have enough storage space
+   - Try installing to external storage if available
+
+2. If cron jobs don't run:
+   - Check if cron daemon is running: `/etc/init.d/cron status`
+   - Verify cron file permissions: `chmod 600 /etc/crontabs/root`
+   - Restart cron daemon: `/etc/init.d/cron restart`
+
+3. If storage space is limited:
+   - Consider mounting external storage
+   - Adjust log rotation size in rotate_logs.sh
+   - Monitor space usage with `df -h`
 
 ## Security Considerations
 
