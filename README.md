@@ -51,7 +51,7 @@ cd gl.itnet-crash-reboot-alert
 2. Configure your environment:
 ```bash
 cp .env.example .env
-nano .env  # Edit with your Pushover credentials and settings
+vi .env  # Edit with your Pushover credentials and settings
 ```
 
 3. Run the installation script:
