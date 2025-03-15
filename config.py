@@ -10,8 +10,11 @@ This module manages the configuration settings for the connectivity monitor,
 loading values from environment variables with fallback to defaults.
 
 Configuration values:
+    NOTIFICATION_TYPE: Notification type ('pushover' or 'telegram')
     PUSHOVER_TOKEN: Pushover API token
     PUSHOVER_USER: Pushover user key
+    TELEGRAM_BOT_TOKEN: Telegram bot token
+    TELEGRAM_CHAT_ID: Telegram chat ID
     TARGET_URL: URL or IP to monitor
     TIMEOUT: Request timeout in seconds
     MAX_RETRIES: Number of retry attempts
@@ -24,8 +27,11 @@ from typing import Dict, Any
 
 # Default configuration with type hints
 DEFAULT_CONFIG: Dict[str, Any] = {
+    'NOTIFICATION_TYPE': 'pushover',  # 'pushover' or 'telegram'
     'PUSHOVER_TOKEN': '',  # Pushover API token
     'PUSHOVER_USER': '',   # Pushover user key
+    'TELEGRAM_BOT_TOKEN': '',  # Telegram bot token
+    'TELEGRAM_CHAT_ID': '',    # Telegram chat ID
     'TARGET_URL': 'https://example.com',  # Target URL to monitor
     'TIMEOUT': 5,    # Request timeout in seconds
     'MAX_RETRIES': 3,  # Number of retry attempts

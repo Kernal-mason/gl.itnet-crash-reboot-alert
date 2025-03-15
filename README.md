@@ -10,7 +10,7 @@ A Python script that monitors network connectivity and automatically reboots the
 ## Features
 
 - Continuous monitoring of specified URL/IP
-- Pushover notifications for connectivity failures and system events
+- Notifications via Pushover or Telegram for connectivity failures and system events
 - Automatic system reboot on connectivity failure
 - Comprehensive logging to both file and stdout
 - Error handling and timeout management
@@ -19,7 +19,7 @@ A Python script that monitors network connectivity and automatically reboots the
 
 - Python 3.6 or higher
 - GL-iNet router or other Busybox-based system
-- Pushover account (for notifications)
+- Pushover account or Telegram account (for notifications)
 
 ### GL-iNet Router Specific
 
@@ -117,9 +117,40 @@ cat /etc/crontabs/root
 
 The following environment variables can be configured in your `.env` file:
 
+### Notification Type
 ```python
+# Choose your preferred notification service
+NOTIFICATION_TYPE=pushover  # or 'telegram'
+```
+
+### Pushover Configuration
+```python
+# Only needed if using Pushover
 PUSHOVER_TOKEN=your_pushover_token_here  # Your Pushover application token
 PUSHOVER_USER=your_pushover_user_here    # Your Pushover user key
+```
+
+To set up Pushover:
+1. Create an account at https://pushover.net
+2. Create a new application to get your API token
+3. Get your user key from your account dashboard
+
+### Telegram Configuration
+```python
+# Only needed if using Telegram
+TELEGRAM_BOT_TOKEN=your_bot_token_here  # Your Telegram bot token
+TELEGRAM_CHAT_ID=your_chat_id_here      # Your Telegram chat ID
+```
+
+To set up Telegram:
+1. Create a new bot using @BotFather on Telegram
+2. Get your bot token from BotFather
+3. Send a message to your bot
+4. Get your chat ID by visiting:
+   https://api.telegram.org/bot<YourBOTToken>/getUpdates
+
+### General Configuration
+```python
 TARGET_URL=https://example.com           # URL or IP to monitor
 TIMEOUT=5                                # Request timeout in seconds
 MAX_RETRIES=3                           # Number of retry attempts
@@ -158,15 +189,123 @@ vi /etc/crontabs/root
 
 ## Testing
 
-Before setting up the cron job, test the configuration:
+There are several ways to test the connectivity monitor:
+
+### 1. Using the Test Script
 ```bash
 python3 test_connectivity.py
 ```
 
-This will verify:
+This automated test will verify:
 - Pushover credentials
 - Target URL accessibility
 - Basic connectivity
+
+### 2. Manual Testing
+
+1. Test notification service:
+```bash
+# For Pushover
+curl -X POST "https://api.pushover.net/1/messages.json" \
+  --form-string "token=$PUSHOVER_TOKEN" \
+  --form-string "user=$PUSHOVER_USER" \
+  --form-string "message=Test notification"
+
+# For Telegram
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+  -d "chat_id=$TELEGRAM_CHAT_ID" \
+  -d "text=Test notification"
+```
+
+2. Test environment configuration:
+```bash
+cat /usr/bin/.env  # Verify environment variables are set correctly
+```
+
+3. Test Pushover notifications:
+```bash
+# Run the script directly to test connectivity and notifications
+python3 /usr/bin/connectivity_monitor.py
+```
+
+4. Test log rotation:
+```bash
+# Create a large log file
+yes "test log entry" | head -n 1000 >> /var/log/connectivity.log
+
+# Run log rotation
+/usr/bin/rotate_logs.sh
+
+# Verify rotation worked
+ls -l /var/log/connectivity*
+```
+
+5. Test cron configuration:
+```bash
+# Check cron job setup
+cat /etc/crontabs/root
+
+# Verify cron daemon is running
+/etc/init.d/cron status
+```
+
+### 3. Simulating Failures
+
+1. Network failure test:
+```bash
+# Temporarily change TARGET_URL to an invalid address
+sed -i 's/TARGET_URL=.*/TARGET_URL=https:\/\/invalid.example.com/' /usr/bin/.env
+
+# Run the script
+python3 /usr/bin/connectivity_monitor.py
+
+# Check the logs
+tail -f /var/log/connectivity.log
+
+# Don't forget to change TARGET_URL back!
+```
+
+2. Permission test:
+```bash
+# Verify reboot permission
+ls -l /sbin/reboot
+```
+
+### 4. Monitoring
+
+Monitor the script's operation:
+```bash
+# Watch the log file in real-time
+tail -f /var/log/connectivity.log
+
+# Check Pushover notification history in your Pushover app
+```
+
+### Common Test Issues
+
+1. If test_connectivity.py fails:
+   - Verify network connectivity
+   - Check Pushover credentials
+   - Ensure TARGET_URL is accessible
+
+2. If notifications aren't received:
+   - Verify Pushover tokens in .env
+   - Check internet connectivity
+   - Look for errors in the log file
+
+3. If cron jobs aren't running:
+   - Check cron daemon status
+   - Verify file permissions
+   - Check system time is correct
+
+### Production Deployment
+
+Before deploying to production:
+1. Run all tests successfully
+2. Verify log rotation is working
+3. Test actual reboot functionality
+4. Monitor for false positives
+5. Adjust timeouts and retries as needed
 
 ## Log File
 

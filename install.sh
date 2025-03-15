@@ -10,12 +10,55 @@
 # This script handles the installation of the connectivity monitor
 # and sets up necessary permissions and configurations.
 
+# Function to get user input for notification type
+setup_notifications() {
+    echo "Please choose your notification service:"
+    echo "1) Pushover"
+    echo "2) Telegram"
+    read -p "Enter choice (1 or 2): " choice
+
+    case $choice in
+        1)
+            echo "You selected Pushover"
+            echo "Please follow these steps to configure Pushover:"
+            echo "1. Create an account at https://pushover.net"
+            echo "2. Create a new application to get your API token"
+            echo "3. Get your user key from your account dashboard"
+            echo ""
+            echo "Update your .env file with:"
+            echo "NOTIFICATION_TYPE=pushover"
+            echo "PUSHOVER_TOKEN=your_api_token"
+            echo "PUSHOVER_USER=your_user_key"
+            ;;
+        2)
+            echo "You selected Telegram"
+            echo "Please follow these steps to configure Telegram:"
+            echo "1. Create a new bot using @BotFather on Telegram"
+            echo "2. Get your bot token from BotFather"
+            echo "3. Send a message to your bot"
+            echo "4. Get your chat ID by visiting:"
+            echo "   https://api.telegram.org/bot<YourBOTToken>/getUpdates"
+            echo ""
+            echo "Update your .env file with:"
+            echo "NOTIFICATION_TYPE=telegram"
+            echo "TELEGRAM_BOT_TOKEN=your_bot_token"
+            echo "TELEGRAM_CHAT_ID=your_chat_id"
+            ;;
+        *)
+            echo "Invalid choice. Defaulting to Pushover"
+            ;;
+    esac
+}
+
 # Check if .env file exists
 if [ ! -f ".env" ]; then
     echo "Error: .env file not found!"
     echo "Please copy .env.example to .env and configure it before running this script."
     exit 1
 fi
+
+# Run notification setup
+setup_notifications
 
 # Installation directories for GL-iNet/BusyBox systems
 INSTALL_DIR="/usr/bin"
