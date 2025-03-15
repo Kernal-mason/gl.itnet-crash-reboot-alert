@@ -4,6 +4,7 @@ Configuration Module for Connectivity Monitor
 Author: Mason Gonzalez
 Created: March 2024
 License: MIT
+Repository: https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert
 
 This module manages the configuration settings for the connectivity monitor,
 loading values from environment variables with fallback to defaults.

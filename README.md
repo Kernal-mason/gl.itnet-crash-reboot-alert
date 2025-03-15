@@ -3,6 +3,7 @@
 Author: Mason Gonzalez
 Created: March 2024
 License: MIT
+Repository: https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert
 
 A Python script that monitors network connectivity and automatically reboots the system if connectivity fails, with Pushover notifications for alerts.
 
@@ -43,19 +44,25 @@ There are two ways to install the Connectivity Monitor:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/masongonzalez/connectivity-monitor.git
-cd connectivity-monitor
+git clone https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert.git
+cd gl.itnet-crash-reboot-alert
 ```
 
-2. Run the installation script:
+2. Configure your environment:
+```bash
+cp .env.example .env
+nano .env  # Edit with your Pushover credentials and settings
+```
+
+3. Run the installation script:
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-3. Configure your environment:
+4. Verify the installation:
 ```bash
-nano .env  # Edit with your Pushover credentials and settings
+python3 test_connectivity.py
 ```
 
 ### Manual Installation
@@ -67,7 +74,13 @@ opkg install python3-pip
 pip3 install -r requirements.txt
 ```
 
-2. Clone or copy the script:
+2. Configure environment variables:
+```bash
+cp .env.example .env
+nano .env  # Edit with your Pushover credentials and settings
+```
+
+3. Clone or copy the script:
 ```bash
 cp connectivity_monitor.py /usr/bin/
 chmod +x /usr/bin/connectivity_monitor.py
@@ -75,28 +88,30 @@ cp rotate_logs.sh /usr/bin/
 chmod +x /usr/bin/rotate_logs.sh
 ```
 
-3. Create log directory with appropriate permissions:
+4. Create log directory with appropriate permissions:
 ```bash
 touch /var/log/connectivity.log
 chmod 644 /var/log/connectivity.log
-```
-
-4. Configure environment variables:
-```bash
-cp .env.example .env
-nano .env  # Edit with your Pushover credentials and settings
 ```
 
 ### Post-Installation
 
 After either installation method:
 
-1. Verify your installation:
+1. Verify the configuration:
 ```bash
 python3 test_connectivity.py
 ```
 
-2. If the test passes, proceed to set up the cron job as described in the "Setting up the Cron Job" section.
+2. If the test fails:
+   - Check your Pushover credentials in .env
+   - Verify network connectivity
+   - Review permissions
+
+3. The cron jobs should be automatically configured. Verify them with:
+```bash
+cat /etc/crontabs/root
+```
 
 ## Configuration
 

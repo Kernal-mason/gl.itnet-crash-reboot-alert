@@ -5,9 +5,17 @@
 # Author: Mason Gonzalez
 # Created: March 2024
 # License: MIT
+# Repository: https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert
 #
 # This script handles the installation of the connectivity monitor
 # and sets up necessary permissions and configurations.
+
+# Check if .env file exists
+if [ ! -f ".env" ]; then
+    echo "Error: .env file not found!"
+    echo "Please copy .env.example to .env and configure it before running this script."
+    exit 1
+fi
 
 # Installation directories for GL-iNet/BusyBox systems
 INSTALL_DIR="/usr/bin"
@@ -18,6 +26,9 @@ CRON_DIR="/etc/crontabs"
 mkdir -p "$LOG_DIR"
 mkdir -p "$CRON_DIR"
 
+# Copy environment file to installation directory
+cp .env "$INSTALL_DIR/"
+
 # Copy scripts to installation directory
 cp connectivity_monitor.py "$INSTALL_DIR/"
 cp rotate_logs.sh "$INSTALL_DIR/"
@@ -25,6 +36,7 @@ cp rotate_logs.sh "$INSTALL_DIR/"
 # Set permissions
 chmod +x "$INSTALL_DIR/connectivity_monitor.py"
 chmod +x "$INSTALL_DIR/rotate_logs.sh"
+chmod 600 "$INSTALL_DIR/.env"
 
 # Create and set permissions for log file
 touch "$LOG_DIR/connectivity.log"
@@ -45,11 +57,9 @@ if ! grep -q "$CRON_ENTRY" "$CRON_FILE"; then
     echo "$ROTATE_ENTRY" >> "$CRON_FILE"
 fi
 
-# Copy example environment file
-cp .env.example .env
-
 # Restart crond to apply changes
 /etc/init.d/cron restart
 
-echo "Installation complete. Please edit .env with your configuration."
-echo "Cron jobs have been added to: $CRON_FILE" 
+echo "Installation complete."
+echo "Cron jobs have been added to: $CRON_FILE"
+echo "Environment file has been installed to: $INSTALL_DIR/.env" 

@@ -8,6 +8,7 @@ Designed for busybox-based systems with limited resources.
 Author: Mason Gonzalez
 Created: March 2024
 License: MIT
+Repository: https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert
 
 This script monitors network connectivity to a specified URL/IP and triggers
 a system reboot if connectivity fails. It includes Pushover notifications

@@ -5,6 +5,7 @@
 # Author: Mason Gonzalez
 # Created: March 2024
 # License: MIT
+# Repository: https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert
 #
 # This script handles log rotation for the connectivity monitor
 # on systems with limited storage capacity.

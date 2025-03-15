@@ -5,6 +5,7 @@ Test Script for Connectivity Monitor
 Author: Mason Gonzalez
 Created: March 2024
 License: MIT
+Repository: https://github.com/Kernal-mason/gl.itnet-crash-reboot-alert
 
 This script tests the configuration and connectivity settings
 before deploying the monitor. It verifies:
